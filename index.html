@@ -6,13 +6,6 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Опитування — monobank</title>
 
-<!--
-  Content-Security-Policy: список того, куди сторінці ВЗАГАЛІ дозволено
-  звертатися. Навіть якщо хтось колись підмінить код на сторінці, відповіді
-  фізично не зможуть піти на чужий сервер — браузер заблокує з'єднання.
-  Дозволено рівно дві адреси: script.google.com і script.googleusercontent.com
-  (друга — це той сервер, куди Apps Script перекидає запит усередині).
--->
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 
@@ -201,12 +194,7 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 .field-block { margin-bottom: 16px; }
 .field-block:last-child { margin-bottom: 0; }
 
-/* ── Honeypot: поле-приманка ──
-   Живі люди його не бачать і не заповнюють. Найпростіші боти, які тупо
-   заповнюють усі поля форми підряд, — заповнюють. Якщо воно прийшло
-   непорожнім, скрипт відповідає «ок», але в таблицю нічого не пише.
-   Не display:none — деякі боти такі поля пропускають. Тому виносимо за екран. */
-.hp-trap {
+.aux-field {
   position: absolute; left: -9999px; top: auto;
   width: 1px; height: 1px; overflow: hidden;
 }
@@ -347,10 +335,9 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 <!-- Card -->
 <div class="card" id="formCard">
 
-  <!-- Поле-приманка для ботів. Людина його не бачить. -->
-  <div class="hp-trap" aria-hidden="true">
-    <label for="hp_website">Website</label>
-    <input type="text" id="hp_website" name="website" tabindex="-1" autocomplete="off">
+  <div class="aux-field" aria-hidden="true">
+    <label for="q_referral">Referral</label>
+    <input type="text" id="q_referral" name="referral" tabindex="-1" autocomplete="off">
   </div>
 
   <!-- 0. Привітальний екран -->
@@ -581,7 +568,7 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 
 <!-- Стерти чернетку з цього браузера -->
 <div class="privacy-bar" id="privacyBar">
-  <button class="btn-wipe" onclick="wipeDraft()">  </button>
+  <button class="btn-wipe" onclick="wipeDraft()">Стерти мої відповіді з цього браузера</button>
 </div>
 
 <!-- Thank you -->
@@ -589,7 +576,7 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
   <div class="ty-cat">🐱</div>
   <h2>Дякуємо за відповіді!</h2>
   <p>Ваша думка дуже важлива для нас і допоможе зробити компанію кращою.</p>
-  <div class="ty-note"> </div>
+  <div class="ty-note">Чернетку відповідей стерто з цього браузера.</div>
 </div>
 
 <script>
@@ -604,21 +591,7 @@ const ALL_QUESTIONS = [
   'return', 'new_job', 'use_monobank', 'recommend_score'
 ];
 
-// ─────────────────────────────────────────────────────────────
-// КОНФІГУРАЦІЯ ВІДПРАВКИ
-//
-// APPS_SCRIPT_URL — адреса веб-застосунку Apps Script.
-// FORM_TOKEN      — спільний пароль між цією сторінкою і скриптом.
-//                   Мусить ТОЧНО збігатися зі значенням FORM_TOKEN
-//                   у файлі «макрос екз (захищений).gs».
-//
-// Чесно про межі цього захисту: токен лежить у коді сторінки, тому людина,
-// яка відкрила «Перегляд коду», його побачить. Він зупиняє автоматичні
-// сканери, які просто знаходять URL і починають гатити в нього запити, —
-// і не зупиняє того, хто цілеспрямовано читав код. Якщо колись знадобиться
-// справжня перевірка «хто саме відповідає» — потрібні персональні
-// одноразові посилання, це інша схема.
-// ─────────────────────────────────────────────────────────────
+// ── Конфігурація відправки ──
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzb2YBug_z5PGl4nDMw9RPDESM7rUfbziVK5BYRkjBm6EsZVZzyJ42F4-lsjZnpqG6C/exec';
 const FORM_TOKEN = 'mn_9Kq4Vb7Rt2Ls8Pw3Zc6Xj';
 
@@ -627,10 +600,10 @@ const FORM_TOKEN = 'mn_9Kq4Vb7Rt2Ls8Pw3Zc6Xj';
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000; // 24 години
 
 let stepQueue = [];
-let curIdx = 0;          // індекс у stepQueue
-let startedAt = 0;       // коли людина вперше відкрила анкету (переживає перезавантаження)
-let submissionId = '';   // один на спробу відправки; переживає повтор, щоб не подвоїти рядок
-let isSending = false;   // захист від подвійного кліку «Надіслати»
+let curIdx = 0;
+let startedAt = 0;
+let submissionId = '';
+let isSending = false;
 
 // ── Унікальний id відправки ──
 function makeId() {
@@ -994,15 +967,6 @@ function collect() {
 }
 
 // ── Submit ──
-//
-// Раніше тут стояло mode:'no-cors'. Це означало, що браузер не давав
-// прочитати відповідь сервера, і форма показувала «Дякуємо» навіть тоді,
-// коли запис у таблицю не відбувся: людина йшла, а відповіді не було.
-//
-// Тепер надсилаємо як text/plain. Такий запит браузер вважає «простим»
-// і не робить попереднього preflight-запиту, якого Apps Script не вміє
-// обробляти. Завдяки цьому відповідь сервера читається — і форма показує
-// «Дякуємо» ЛИШЕ якщо рядок справді записався.
 async function submit() {
   if (isSending) return;
 
@@ -1015,16 +979,13 @@ async function submit() {
     return;
   }
 
-  // Один id на всю спробу відправки. Якщо запис пройшов, а відповідь
-  // не доїхала, і людина тисне «Надіслати» ще раз — скрипт побачить той
-  // самий id і не створить другий рядок.
   if (!submissionId) { submissionId = makeId(); saveDraft(); }
 
   const envelope = {
     token: FORM_TOKEN,
     submissionId: submissionId,
     elapsedMs: Date.now() - startedAt,
-    hp: document.getElementById('hp_website').value,
+    ref: document.getElementById('q_referral').value,
     data: collect(),
   };
 
@@ -1078,9 +1039,8 @@ function showThankYou() {
     el.addEventListener('change', saveDraft);
   });
 
-  // Приманку в чернетку не пишемо і не відновлюємо.
-  const hp = document.getElementById('hp_website');
-  if (hp) hp.value = '';
+  const aux = document.getElementById('q_referral');
+  if (aux) aux.value = '';
 })();
 </script>
 </body>
