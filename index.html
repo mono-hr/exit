@@ -3,8 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Опитування — monobank</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+<!--
+  Content-Security-Policy: список того, куди сторінці ВЗАГАЛІ дозволено
+  звертатися. Навіть якщо хтось колись підмінить код на сторінці, відповіді
+  фізично не зможуть піти на чужий сервер — браузер заблокує з'єднання.
+  Дозволено рівно дві адреси: script.google.com і script.googleusercontent.com
+  (друга — це той сервер, куди Apps Script перекидає запит усередині).
+-->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -16,10 +27,16 @@
   --text:    #1a1a1a;
   --muted:   #888;
   --r:       14px;
+
+  /* Системні шрифти замість Google Fonts: раніше кожен, хто відкривав
+     анкету, віддавав свій IP і адресу сторінки на сервери Google. Тепер
+     сторінка не звертається до жодного зовнішнього сервера. */
+  --font-head: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 body {
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-body);
   background: #efefef;
   min-height: 100vh;
   display: flex;
@@ -44,7 +61,7 @@ body {
   text-decoration: none;
 }
 .mono-wordmark {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-head);
   font-size: 32px;
   font-weight: 800;
   color: var(--black);
@@ -52,7 +69,7 @@ body {
   line-height: 1;
 }
 .mono-tagline {
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   font-weight: 400;
   color: var(--muted);
@@ -113,7 +130,7 @@ body {
   animation: popIn .5s cubic-bezier(.34,1.56,.64,1);
 }
 .welcome-title {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-head);
   font-size: 26px;
   font-weight: 800;
   color: var(--black);
@@ -142,7 +159,7 @@ body {
   font-size: 11px; font-weight: 800;
 }
 .step-q {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-head);
   font-size: 20px; font-weight: 700; color: var(--black);
   margin-bottom: 5px; line-height: 1.35;
 }
@@ -153,7 +170,7 @@ input[type="text"],
 textarea,
 select {
   width: 100%;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px; color: var(--text);
   background: var(--gray);
   border: 2px solid var(--border);
@@ -183,6 +200,16 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 .field-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
 .field-block { margin-bottom: 16px; }
 .field-block:last-child { margin-bottom: 0; }
+
+/* ── Honeypot: поле-приманка ──
+   Живі люди його не бачать і не заповнюють. Найпростіші боти, які тупо
+   заповнюють усі поля форми підряд, — заповнюють. Якщо воно прийшло
+   непорожнім, скрипт відповідає «ок», але в таблицю нічого не пише.
+   Не display:none — деякі боти такі поля пропускають. Тому виносимо за екран. */
+.hp-trap {
+  position: absolute; left: -9999px; top: auto;
+  width: 1px; height: 1px; overflow: hidden;
+}
 
 /* ── Char counter ── */
 .cc { text-align: right; font-size: 11px; color: var(--muted); margin-top: 5px; }
@@ -241,7 +268,7 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
   display: flex; align-items: center; gap: 6px;
   background: none; border: 2px solid var(--border);
   border-radius: 40px; padding: 10px 20px;
-  font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
   color: var(--text); cursor: pointer;
   transition: border-color .18s;
 }
@@ -250,7 +277,7 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
   display: flex; align-items: center; gap: 8px;
   background: var(--black); color: #fff;
   border: none; border-radius: 40px; padding: 12px 28px;
-  font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
   cursor: pointer;
   transition: background .2s, transform .18s, box-shadow .2s;
   box-shadow: 0 3px 14px rgba(0,0,0,0.18);
@@ -258,6 +285,19 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 .btn-next:hover { background: #333; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
 .btn-next:disabled { background: #aaa; box-shadow: none; cursor: not-allowed; transform: none; }
 .btn-next svg, .btn-back svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ── Кнопка «стерти чернетку» ── */
+.privacy-bar {
+  width: 100%; max-width: 660px;
+  margin-top: 16px; text-align: center;
+}
+.btn-wipe {
+  background: none; border: none;
+  font-family: var(--font-body); font-size: 12px;
+  color: var(--muted); text-decoration: underline;
+  cursor: pointer; padding: 6px 10px;
+}
+.btn-wipe:hover { color: var(--black); }
 
 /* ── Thank you ── */
 #thankyou {
@@ -269,10 +309,11 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 .ty-cat { font-size: 64px; margin-bottom: 18px; animation: popIn .5s cubic-bezier(.34,1.56,.64,1); }
 @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
 #thankyou h2 {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-head);
   font-size: 26px; font-weight: 800; color: var(--black); margin-bottom: 10px;
 }
 #thankyou p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+#thankyou .ty-note { font-size: 12px; color: var(--muted); margin-top: 16px; }
 
 @media(max-width:520px){
   .step { padding: 26px 18px 22px; }
@@ -305,6 +346,12 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 
 <!-- Card -->
 <div class="card" id="formCard">
+
+  <!-- Поле-приманка для ботів. Людина його не бачить. -->
+  <div class="hp-trap" aria-hidden="true">
+    <label for="hp_website">Website</label>
+    <input type="text" id="hp_website" name="website" tabindex="-1" autocomplete="off">
+  </div>
 
   <!-- 0. Привітальний екран -->
   <div class="step active" id="step0">
@@ -532,11 +579,17 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
   </div>
 </div>
 
+<!-- Стерти чернетку з цього браузера -->
+<div class="privacy-bar" id="privacyBar">
+  <button class="btn-wipe" onclick="wipeDraft()">Стерти мої відповіді з цього браузера</button>
+</div>
+
 <!-- Thank you -->
 <div id="thankyou">
   <div class="ty-cat">🐱</div>
   <h2>Дякуємо за відповіді!</h2>
   <p>Ваша думка дуже важлива для нас і допоможе зробити компанію кращою.</p>
+  <div class="ty-note">Чернетку відповідей стерто з цього браузера.</div>
 </div>
 
 <script>
@@ -552,14 +605,45 @@ const ALL_QUESTIONS = [
 ];
 
 // ─────────────────────────────────────────────────────────────
-// КОНФІГУРАЦІЯ ВІДПРАВКИ — заповнити URL-ом Google Apps Script,
-// що приймає POST з полем "payload" (JSON.stringify(data)).
-// Якщо порожньо — форма просто показує «Дякуємо» без відправки даних.
+// КОНФІГУРАЦІЯ ВІДПРАВКИ
+//
+// APPS_SCRIPT_URL — адреса веб-застосунку Apps Script.
+// FORM_TOKEN      — спільний пароль між цією сторінкою і скриптом.
+//                   Мусить ТОЧНО збігатися зі значенням FORM_TOKEN
+//                   у файлі «макрос екз (захищений).gs».
+//
+// Чесно про межі цього захисту: токен лежить у коді сторінки, тому людина,
+// яка відкрила «Перегляд коду», його побачить. Він зупиняє автоматичні
+// сканери, які просто знаходять URL і починають гатити в нього запити, —
+// і не зупиняє того, хто цілеспрямовано читав код. Якщо колись знадобиться
+// справжня перевірка «хто саме відповідає» — потрібні персональні
+// одноразові посилання, це інша схема.
 // ─────────────────────────────────────────────────────────────
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4SaBYJM2LU87PtQlAlGla1KV9FtyF69amuSS39aaYWuPHyTJddXB5nYUXUApjB4lb/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzb2YBug_z5PGl4nDMw9RPDESM7rUfbziVK5BYRkjBm6EsZVZzyJ42F4-lsjZnpqG6C/exec';
+const FORM_TOKEN = 'mn_9Kq4Vb7Rt2Ls8Pw3Zc6Xj';
+
+// Чернетка старша за цей строк вважається покинутою і затирається,
+// щоб ПІБ і тексти не лежали в чужому браузері тижнями.
+const DRAFT_TTL_MS = 24 * 60 * 60 * 1000; // 24 години
 
 let stepQueue = [];
-let curIdx = 0; // індекс у stepQueue
+let curIdx = 0;          // індекс у stepQueue
+let startedAt = 0;       // коли людина вперше відкрила анкету (переживає перезавантаження)
+let submissionId = '';   // один на спробу відправки; переживає повтор, щоб не подвоїти рядок
+let isSending = false;   // захист від подвійного кліку «Надіслати»
+
+// ── Унікальний id відправки ──
+function makeId() {
+  try {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    if (window.crypto && crypto.getRandomValues) {
+      const a = new Uint8Array(16);
+      crypto.getRandomValues(a);
+      return Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
+    }
+  } catch (_) {}
+  return 's' + Date.now() + '_' + String(performance.now()).replace('.', '');
+}
 
 function buildStepQueue() {
   stepQueue = [];
@@ -582,7 +666,7 @@ function uiSync() {
 
   const isWelcome = stepQueue[curIdx].type === 'welcome';
   const totalQ = stepQueue.length - 1; // excluding welcome
-  const currentQ = curIdx; // 0 = welcome, 1..n = questions
+  const currentQ = curIdx;             // 0 = welcome, 1..n = questions
 
   const progressWrap = document.getElementById('progressWrap');
   if (isWelcome) {
@@ -793,14 +877,18 @@ document.getElementById('q_recommend_score').addEventListener('change', function
 });
 
 // ── LocalStorage draft ──
-const LS_KEY = 'mono_exit_survey_v2_draft';
+const LS_KEY = 'mono_exit_survey_v3_draft';
+
+const DRAFT_FIELDS = [
+  'q_name','q_country','q_recruiter_eval','q_training_impression',
+  'q_adaptation_experience','q_cv_experience','q_team_communication',
+  'q_remarks','q_suggestions','q_expectations','q_quit_stage','q_quit_reason',
+  'q_ret_conditions','q_new_job','q_recommend_score'
+];
 
 function saveDraft() {
   const draft = {};
-  ['q_name','q_country','q_recruiter_eval','q_training_impression',
-   'q_adaptation_experience','q_cv_experience','q_team_communication',
-   'q_remarks','q_suggestions','q_expectations','q_quit_stage','q_quit_reason',
-   'q_ret_conditions','q_new_job','q_recommend_score'].forEach(id => {
+  DRAFT_FIELDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) draft[id] = el.value;
   });
@@ -810,6 +898,9 @@ function saveDraft() {
   });
   draft['no_adaptation'] = document.getElementById('q_no_adaptation').checked;
   draft['curIdx'] = curIdx;
+  draft['startedAt'] = startedAt;
+  draft['submissionId'] = submissionId;
+  draft['savedAt'] = Date.now();
 
   try { localStorage.setItem(LS_KEY, JSON.stringify(draft)); } catch (_) {}
 }
@@ -819,10 +910,13 @@ function restoreDraft() {
   try { draft = JSON.parse(localStorage.getItem(LS_KEY)); } catch (_) {}
   if (!draft) return;
 
-  ['q_name','q_country','q_recruiter_eval','q_training_impression',
-   'q_adaptation_experience','q_cv_experience','q_team_communication',
-   'q_remarks','q_suggestions','q_expectations','q_quit_stage','q_quit_reason',
-   'q_ret_conditions','q_new_job','q_recommend_score'].forEach(id => {
+  // Покинута чернетка: не тримаємо ПІБ і тексти в браузері довше за добу.
+  if (!draft.savedAt || Date.now() - draft.savedAt > DRAFT_TTL_MS) {
+    clearDraft();
+    return;
+  }
+
+  DRAFT_FIELDS.forEach(id => {
     const el = document.getElementById(id);
     if (el && draft[id] != null) el.value = draft[id];
   });
@@ -855,10 +949,20 @@ function restoreDraft() {
   if (draft['curIdx'] > 0 && draft['curIdx'] < stepQueue.length) {
     curIdx = draft['curIdx'];
   }
+  if (draft['startedAt']) startedAt = draft['startedAt'];
+  if (draft['submissionId']) submissionId = draft['submissionId'];
 }
 
 function clearDraft() {
   try { localStorage.removeItem(LS_KEY); } catch (_) {}
+}
+
+// Кнопка «Стерти мої відповіді з цього браузера» — для спільних
+// та робочих компʼютерів, щоб після себе нічого не лишати.
+function wipeDraft() {
+  if (!confirm('Стерти всі введені відповіді та почати анкету з початку?')) return;
+  clearDraft();
+  location.reload();
 }
 
 // ── Collect ──
@@ -890,12 +994,20 @@ function collect() {
 }
 
 // ── Submit ──
+//
+// Раніше тут стояло mode:'no-cors'. Це означало, що браузер не давав
+// прочитати відповідь сервера, і форма показувала «Дякуємо» навіть тоді,
+// коли запис у таблицю не відбувся: людина йшла, а відповіді не було.
+//
+// Тепер надсилаємо як text/plain. Такий запит браузер вважає «простим»
+// і не робить попереднього preflight-запиту, якого Apps Script не вміє
+// обробляти. Завдяки цьому відповідь сервера читається — і форма показує
+// «Дякуємо» ЛИШЕ якщо рядок справді записався.
 async function submit() {
-  const data = collect();
+  if (isSending) return;
+
   const btn = document.getElementById('btnNext');
-  btn.disabled = true;
   const msg = document.getElementById('sendMsg');
-  if (msg) msg.textContent = 'Надсилаємо…';
 
   if (!APPS_SCRIPT_URL) {
     clearDraft();
@@ -903,28 +1015,49 @@ async function submit() {
     return;
   }
 
-  // fetch з urlencoded-тілом: Apps Script читає це як e.parameter.payload.
-  // mode:'no-cors' — відповідь нам не потрібна, а Apps Script не віддає CORS-заголовки.
-  // Без iframe, бо CSP хостингу може блокувати вбудовування script.google.com.
+  // Один id на всю спробу відправки. Якщо запис пройшов, а відповідь
+  // не доїхала, і людина тисне «Надіслати» ще раз — скрипт побачить той
+  // самий id і не створить другий рядок.
+  if (!submissionId) { submissionId = makeId(); saveDraft(); }
+
+  const envelope = {
+    token: FORM_TOKEN,
+    submissionId: submissionId,
+    elapsedMs: Date.now() - startedAt,
+    hp: document.getElementById('hp_website').value,
+    data: collect(),
+  };
+
+  isSending = true;
+  btn.disabled = true;
+  if (msg) msg.textContent = 'Надсилаємо…';
+
   try {
-    await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: new URLSearchParams({ payload: JSON.stringify(data) }).toString(),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(envelope),
+      redirect: 'follow',
     });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const out = await res.json();
+    if (out.status !== 'ok') throw new Error('server: ' + out.status);
+
     clearDraft();
     showThankYou();
-  } catch (err) {
-    console.error('Не вдалося надіслати відповіді:', err);
+  } catch (e) {
+    console.error('Не вдалося надіслати відповіді:', e);
+    isSending = false;
     btn.disabled = false;
-    if (msg) msg.textContent = 'Не вдалося надіслати. Перевірте з\'єднання та натисніть «Надіслати» ще раз.';
+    if (msg) msg.textContent = 'Не вдалося надіслати. Перевірте зʼєднання та натисніть «Надіслати» ще раз — дублікат не створиться.';
   }
 }
 
 function showThankYou() {
   document.getElementById('formCard').style.display = 'none';
   document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('privacyBar').style.display = 'none';
   document.querySelector('.header').style.display = 'none';
   document.getElementById('thankyou').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -932,6 +1065,7 @@ function showThankYou() {
 
 // ── Init ──
 (function init() {
+  startedAt = Date.now();   // перезапишеться з чернетки, якщо вона є
   buildStepQueue();
   restoreDraft();
   uiSync();
@@ -943,6 +1077,10 @@ function showThankYou() {
   document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(el => {
     el.addEventListener('change', saveDraft);
   });
+
+  // Приманку в чернетку не пишемо і не відновлюємо.
+  const hp = document.getElementById('hp_website');
+  if (hp) hp.value = '';
 })();
 </script>
 </body>
