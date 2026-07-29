@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Опитування — monobank</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:   #1a1a1a;
+  --gray:    #f5f5f5;
+  --border:  #e2e2e2;
+  --accent:  #f5a623;
+  --text:    #1a1a1a;
+  --muted:   #888;
+  --r:       14px;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  background: #efefef;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 44px 16px 80px;
+  color: var(--text);
+}
+
+/* ── Logo ── */
+.header {
+  width: 100%;
+  max-width: 660px;
+  margin-bottom: 30px;
+  text-align: right;
+}
+.mono-logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-decoration: none;
+}
+.mono-wordmark {
+  font-family: 'Inter', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--black);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.mono-tagline {
+  font-family: 'Lato', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+/* ── Progress ── */
+.progress-wrap {
+  width: 100%;
+  max-width: 660px;
+  margin-bottom: 22px;
+}
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.progress-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--black);
+  border-radius: 3px;
+  transition: width 0.42s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+
+/* ── Card ── */
+.card {
+  width: 100%;
+  max-width: 660px;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+/* ── Steps ── */
+.step { display: none; padding: 36px 40px 28px; animation: fadeUp .3s ease; }
+.step.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Welcome screen ── */
+#step0 {
+  padding: 48px 40px 36px;
+  text-align: center;
+}
+.welcome-emoji {
+  font-size: 56px;
+  margin-bottom: 20px;
+  animation: popIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+.welcome-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+.welcome-sub {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 28px;
+  max-width: 460px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.step-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .9px;
+  margin-bottom: 10px;
+}
+.step-badge-num {
+  width: 22px; height: 22px;
+  background: var(--black); color: #fff;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800;
+}
+.step-q {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px; font-weight: 700; color: var(--black);
+  margin-bottom: 5px; line-height: 1.35;
+}
+.step-hint { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
+
+/* ── Fields ── */
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+  font-family: 'Lato', sans-serif;
+  font-size: 15px; color: var(--text);
+  background: var(--gray);
+  border: 2px solid var(--border);
+  border-radius: var(--r);
+  padding: 13px 16px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  resize: none;
+  appearance: none;
+}
+select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24' stroke='%23888'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--black);
+  background: #fafafa;
+  box-shadow: 0 0 0 3px rgba(26,26,26,.08);
+}
+input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,.09); }
+.errmsg { font-size: 12px; color: #ef4444; font-weight: 700; margin-top: 6px; display: none; }
+.errmsg.on { display: block; }
+
+.field-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+.field-block { margin-bottom: 16px; }
+.field-block:last-child { margin-bottom: 0; }
+
+/* ── Char counter ── */
+.cc { text-align: right; font-size: 11px; color: var(--muted); margin-top: 5px; }
+.cc.warn { color: #f59e0b; }
+.cc.over { color: #ef4444; }
+
+/* ── Radio cards ── */
+.opt-list { display: flex; flex-direction: column; gap: 9px; }
+.opt-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--gray); border: 2px solid var(--border);
+  border-radius: var(--r); padding: 13px 16px;
+  cursor: pointer; user-select: none;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+}
+.opt-item:hover { border-color: #bbb; }
+.opt-item input { display: none; }
+.opt-item.sel {
+  border-color: var(--black); background: #fafafa;
+  box-shadow: 0 0 0 3px rgba(26,26,26,.07);
+}
+.opt-dot {
+  width: 19px; height: 19px; flex-shrink: 0;
+  border-radius: 50%; border: 2px solid var(--border);
+  background: #fff; margin-top: 2px;
+  transition: all .18s; position: relative;
+}
+.opt-item.sel .opt-dot { border-color: var(--black); background: var(--black); }
+.opt-item.sel .opt-dot::after {
+  content: ''; position: absolute; top:50%; left:50%;
+  transform: translate(-50%,-50%);
+  width: 6px; height: 6px; background: #fff; border-radius: 50%;
+}
+.opt-lbl { font-size: 14px; font-weight: 600; line-height: 1.45; }
+
+/* ── Skip checkbox row (e.g. «Адаптації не було») ── */
+.skip-row {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 14px; color: var(--black); font-weight: 600; cursor: pointer;
+  margin-bottom: 18px;
+  background: var(--gray); border: 2px solid var(--border);
+  border-radius: var(--r); padding: 13px 16px;
+  transition: border-color .18s, background .18s;
+}
+.skip-row:hover { border-color: #bbb; }
+.skip-row input { width: 18px; height: 18px; accent-color: var(--black); cursor: pointer; flex-shrink: 0; }
+.fields-disabled { opacity: .4; pointer-events: none; }
+
+/* ── Footer ── */
+.footer-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 40px 26px;
+  border-top: 1px solid var(--border);
+}
+.btn-back {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: 2px solid var(--border);
+  border-radius: 40px; padding: 10px 20px;
+  font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+  color: var(--text); cursor: pointer;
+  transition: border-color .18s;
+}
+.btn-back:hover { border-color: var(--black); }
+.btn-next {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--black); color: #fff;
+  border: none; border-radius: 40px; padding: 12px 28px;
+  font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, transform .18s, box-shadow .2s;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.18);
+}
+.btn-next:hover { background: #333; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+.btn-next:disabled { background: #aaa; box-shadow: none; cursor: not-allowed; transform: none; }
+.btn-next svg, .btn-back svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ── Thank you ── */
+#thankyou {
+  display: none; width: 100%; max-width: 660px;
+  background: #fff; border-radius: 22px;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.08);
+  padding: 56px 40px 48px; text-align: center;
+}
+.ty-cat { font-size: 64px; margin-bottom: 18px; animation: popIn .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+#thankyou h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 26px; font-weight: 800; color: var(--black); margin-bottom: 10px;
+}
+#thankyou p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+@media(max-width:520px){
+  .step { padding: 26px 18px 22px; }
+  .footer-nav { padding: 14px 18px 20px; }
+  #thankyou { padding: 40px 18px; }
+  #step0 { padding: 36px 18px 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <a class="mono-logo">
+    <span class="mono-wordmark">monobank</span>
+    <span class="mono-tagline">Universal Bank</span>
+  </a>
+</div>
+
+<!-- Progress -->
+<div class="progress-wrap" id="progressWrap" style="display:none">
+  <div class="progress-meta">
+    <span id="pLabel">Крок 1 з …</span>
+    <span id="pPct">0%</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="pFill"></div>
+  </div>
+</div>
+
+<!-- Card -->
+<div class="card" id="formCard">
+
+  <!-- 0. Привітальний екран -->
+  <div class="step active" id="step0">
+    <div class="welcome-emoji">👋</div>
+    <div class="welcome-title">Дякуємо за час, проведений разом</div>
+    <div class="welcome-sub">Нам важлива твоя чесна думка. Ця анкета допоможе нам зрозуміти, що ми робимо добре, а що потрібно змінити. Заповнення займе кілька хвилин.</div>
+  </div>
+
+  <!-- 1. ПІБ -->
+  <div class="step" id="stepQ_name" data-qid="name">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_name">1</div>Особисті дані</div>
+    <div class="step-q">Ваше ПІБ</div>
+    <input type="text" id="q_name" placeholder="Коваленко Тетяна Іванівна" autocomplete="name">
+    <div class="errmsg" id="e_name">Будь ласка, введіть ваше ПІБ</div>
+  </div>
+
+  <!-- 2. Країна -->
+  <div class="step" id="stepQ_country" data-qid="country">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_country">2</div>Особисті дані</div>
+    <div class="step-q">У якій країні наразі проживаєте?</div>
+    <input type="text" id="q_country" placeholder="Напр.: Україна, Київ">
+    <div class="errmsg" id="e_country">Будь ласка, вкажіть країну</div>
+  </div>
+
+  <!-- 3. Оцінка роботи рекрутера -->
+  <div class="step" id="stepQ_recruiter_eval" data-qid="recruiter_eval">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_recruiter_eval">3</div>Вхід у компанію</div>
+    <div class="step-q">Оцініть роботу рекрутера</div>
+    <div class="step-hint">Що саме, на вашу думку, міг би додатково розповісти рекрутер, аби вплинути на ваше рішення залишитися в команді?</div>
+    <textarea id="q_recruiter_eval" rows="5" placeholder="Ваша відповідь…" maxlength="1500"></textarea>
+    <div class="cc" id="cc_recruiter_eval">0 / 1500</div>
+    <div class="errmsg" id="e_recruiter_eval">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 4. Враження від навчання -->
+  <div class="step" id="stepQ_training_impression" data-qid="training_impression">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_training_impression">4</div>Навчання</div>
+    <div class="step-q">Поділіться враженнями від навчання та взаємодії з тренерами</div>
+    <div class="step-hint">Наскільки комфортним було навчання? Чи отримували ви відповіді на всі запитання, можливо, щось викликало дискомфорт?</div>
+    <textarea id="q_training_impression" rows="5" placeholder="Ваша відповідь…" maxlength="1500"></textarea>
+    <div class="cc" id="cc_training_impression">0 / 1500</div>
+    <div class="errmsg" id="e_training_impression">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 5. Адаптація -->
+  <div class="step" id="stepQ_adaptation" data-qid="adaptation">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_adaptation">5</div>Адаптація</div>
+    <div class="step-q">Адаптація після вхідного навчання</div>
+    <div class="step-hint">Як проходила адаптація в перші місяці роботи?</div>
+
+    <label class="skip-row">
+      <input type="checkbox" id="q_no_adaptation" onchange="toggleNoAdaptation(this)">
+      <span>Адаптації не було</span>
+    </label>
+
+    <div id="adaptationFields">
+      <textarea id="q_adaptation_experience" rows="5" placeholder="Ваша відповідь…" maxlength="1500"></textarea>
+      <div class="cc" id="cc_adaptation_experience">0 / 1500</div>
+    </div>
+    <div class="errmsg" id="e_adaptation">Будь ласка, напишіть відповідь або позначте «Адаптації не було»</div>
+  </div>
+
+  <!-- 6. Досвід взаємодії з СВ -->
+  <div class="step" id="stepQ_cv_experience" data-qid="cv_experience">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_cv_experience">6</div>Керівництво</div>
+    <div class="step-q">Розкажіть про враження та досвід взаємодії з вашим СВ</div>
+    <div class="step-hint">Наскільки комфортною була взаємодія з вашим СВ? Чи отримували ви необхідну підтримку та відповіді на запитання?</div>
+    <textarea id="q_cv_experience" rows="6" placeholder="Ваша відповідь…" maxlength="1500"></textarea>
+    <div class="cc" id="cc_cv_experience">0 / 1500</div>
+    <div class="errmsg" id="e_cv_experience">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 7. Досвід взаємодії з колегами -->
+  <div class="step" id="stepQ_team_communication" data-qid="team_communication">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_team_communication">7</div>Колектив</div>
+    <div class="step-q">Поділіться, будь ласка, досвідом взаємодії з колегами</div>
+    <div class="step-hint">Що вам подобалося, а що, можливо, викликало труднощі або дискомфорт?</div>
+    <textarea id="q_team_communication" rows="6" placeholder="Ваша відповідь…" maxlength="1500"></textarea>
+    <div class="cc" id="cc_team_communication">0 / 1500</div>
+    <div class="errmsg" id="e_team_communication">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 8. Зауваження -->
+  <div class="step" id="stepQ_remarks" data-qid="remarks">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_remarks">8</div>Зворотний зв'язок</div>
+    <div class="step-q">Чи є у вас зауваження, які ви помітили під час навчання та роботи?</div>
+    <textarea id="q_remarks" rows="5" placeholder="Ваша відповідь… (напишіть «немає», якщо зауважень нема)" maxlength="1500"></textarea>
+    <div class="cc" id="cc_remarks">0 / 1500</div>
+    <div class="errmsg" id="e_remarks">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 9. Пропозиції змін -->
+  <div class="step" id="stepQ_suggestions" data-qid="suggestions">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_suggestions">9</div>Зворотний зв'язок</div>
+    <div class="step-q">Які зміни в компанії ви запропонували б?</div>
+    <textarea id="q_suggestions" rows="5" placeholder="Ваша відповідь…" maxlength="1500"></textarea>
+    <div class="cc" id="cc_suggestions">0 / 1500</div>
+    <div class="errmsg" id="e_suggestions">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 10. Очікування vs реальність -->
+  <div class="step" id="stepQ_expectations" data-qid="expectations">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_expectations">10</div>Зворотний зв'язок</div>
+    <div class="step-q">Підкажіть, якщо порівнювати ваші очікування та реальність, чи все зійшлося?</div>
+    <div class="step-hint">Що не зійшлося — уточніть, будь ласка, точніше.</div>
+    <textarea id="q_expectations" rows="6" placeholder="Ваша відповідь…" maxlength="1500"></textarea>
+    <div class="cc" id="cc_expectations">0 / 1500</div>
+    <div class="errmsg" id="e_expectations">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 11. Етап думок про звільнення -->
+  <div class="step" id="stepQ_quit_stage" data-qid="quit_stage">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_quit_stage">11</div>Звільнення</div>
+    <div class="step-q">На якому етапі у вас виникли думки про звільнення?</div>
+    <textarea id="q_quit_stage" rows="4" placeholder="Ваша відповідь…" maxlength="1000"></textarea>
+    <div class="cc" id="cc_quit_stage">0 / 1000</div>
+    <div class="errmsg" id="e_quit_stage">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 12. Що вплинуло на рішення звільнитися -->
+  <div class="step" id="stepQ_quit_reason" data-qid="quit_reason">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_quit_reason">12</div>Звільнення</div>
+    <div class="step-q">Що вплинуло на ваше рішення звільнитися?</div>
+    <div class="step-hint">Опишіть детально причину звільнення, що стало ключовим фактором у прийнятті рішення?</div>
+    <textarea id="q_quit_reason" rows="6" placeholder="Ваша відповідь…" maxlength="2000"></textarea>
+    <div class="cc" id="cc_quit_reason">0 / 2000</div>
+    <div class="errmsg" id="e_quit_reason">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 13. Можливість повернення -->
+  <div class="step" id="stepQ_return" data-qid="return">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_return">13</div>Майбутнє</div>
+    <div class="step-q">Чи розглядаєте можливість повернення до нас на роботу в майбутньому?</div>
+    <div class="opt-list" id="ret_list">
+      <label class="opt-item" onclick="pickRadio(this,'ret')">
+        <input type="radio" name="ret" value="Так">
+        <div class="opt-dot"></div>
+        <div class="opt-lbl">Так</div>
+      </label>
+      <label class="opt-item" onclick="pickRadio(this,'ret')">
+        <input type="radio" name="ret" value="Ні">
+        <div class="opt-dot"></div>
+        <div class="opt-lbl">Ні</div>
+      </label>
+      <label class="opt-item" onclick="pickRadio(this,'ret')">
+        <input type="radio" name="ret" value="Можливо, за певних умов">
+        <div class="opt-dot"></div>
+        <div class="opt-lbl">Можливо, за певних умов</div>
+      </label>
+    </div>
+    <div id="ret_conditions_wrap" style="display:none;margin-top:14px">
+      <div class="field-lbl">За яких умов це було б можливо?</div>
+      <textarea id="q_ret_conditions" rows="4" placeholder="Ваша відповідь…" maxlength="1000"></textarea>
+      <div class="cc" id="cc_ret_conditions">0 / 1000</div>
+      <div class="errmsg" id="e_ret_conditions">Будь ласка, вкажіть умови повернення</div>
+    </div>
+    <div class="errmsg" id="e_ret">Будь ласка, оберіть один із варіантів</div>
+  </div>
+
+  <!-- 14. Нова робота -->
+  <div class="step" id="stepQ_new_job" data-qid="new_job">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_new_job">14</div>Майбутнє</div>
+    <div class="step-q">Якщо ви вже знайшли нову роботу, яку сферу вибрали для себе?</div>
+    <div class="step-hint">Поділіться компанією, посадою та умовами (якщо знайшли роботу)</div>
+    <textarea id="q_new_job" rows="5" placeholder="Ваша відповідь…" maxlength="1000"></textarea>
+    <div class="cc" id="cc_new_job">0 / 1000</div>
+    <div class="errmsg" id="e_new_job">Будь ласка, напишіть відповідь</div>
+  </div>
+
+  <!-- 15. Продукти monobank -->
+  <div class="step" id="stepQ_use_monobank" data-qid="use_monobank">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_use_monobank">15</div>monobank</div>
+    <div class="step-q">Чи продовжите ви користуватися продуктами monobank?</div>
+    <div class="opt-list" id="um_list">
+      <label class="opt-item" onclick="pickRadio(this,'um')">
+        <input type="radio" name="um" value="Так">
+        <div class="opt-dot"></div>
+        <div class="opt-lbl">Так</div>
+      </label>
+      <label class="opt-item" onclick="pickRadio(this,'um')">
+        <input type="radio" name="um" value="Ні">
+        <div class="opt-dot"></div>
+        <div class="opt-lbl">Ні</div>
+      </label>
+      <label class="opt-item" onclick="pickRadio(this,'um')">
+        <input type="radio" name="um" value="Ще не визначився(-лась)">
+        <div class="opt-dot"></div>
+        <div class="opt-lbl">Ще не визначився(-лась)</div>
+      </label>
+    </div>
+    <div class="errmsg" id="e_um">Будь ласка, оберіть один із варіантів</div>
+  </div>
+
+  <!-- 16. Оцінка рекомендації 1-10 -->
+  <div class="step" id="stepQ_recommend_score" data-qid="recommend_score">
+    <div class="step-badge"><div class="step-badge-num" id="badgeQ_recommend_score">16</div>monobank</div>
+    <div class="step-q">Оцініть, будь ласка, від 1 до 10, чи порекомендуєте ви компанію monobank для роботи своїм друзям або знайомим 🙏</div>
+    <select id="q_recommend_score">
+      <option value="">Оберіть оцінку…</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
+    <div class="errmsg" id="e_recommend_score">Будь ласка, оберіть оцінку від 1 до 10</div>
+    <div class="sending-msg" id="sendMsg" style="font-size:13px;color:var(--muted);margin-top:10px;min-height:18px"></div>
+  </div>
+
+  <!-- Nav -->
+  <div class="footer-nav">
+    <button class="btn-back" id="btnBack" onclick="prev()" tabindex="-1" style="visibility:hidden">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Назад
+    </button>
+    <button class="btn-next" id="btnNext" onclick="next()" tabindex="-1">
+      Почати
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Thank you -->
+<div id="thankyou">
+  <div class="ty-cat">🐱</div>
+  <h2>Дякуємо за відповіді!</h2>
+  <p>Ваша думка дуже важлива для нас і допоможе зробити компанію кращою.</p>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// Питання у порядку відображення (qid відповідає data-qid кожного step)
+// ─────────────────────────────────────────────────────────────
+const ALL_QUESTIONS = [
+  'name', 'country', 'recruiter_eval', 'training_impression', 'adaptation',
+  'cv_experience', 'team_communication',
+  'remarks', 'suggestions', 'expectations',
+  'quit_stage', 'quit_reason',
+  'return', 'new_job', 'use_monobank', 'recommend_score'
+];
+
+// ─────────────────────────────────────────────────────────────
+// КОНФІГУРАЦІЯ ВІДПРАВКИ — заповнити URL-ом Google Apps Script,
+// що приймає POST з полем "payload" (JSON.stringify(data)).
+// Якщо порожньо — форма просто показує «Дякуємо» без відправки даних.
+// ─────────────────────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4SaBYJM2LU87PtQlAlGla1KV9FtyF69amuSS39aaYWuPHyTJddXB5nYUXUApjB4lb/exec';
+
+let stepQueue = [];
+let curIdx = 0; // індекс у stepQueue
+
+function buildStepQueue() {
+  stepQueue = [];
+  stepQueue.push({ type: 'welcome', el: document.getElementById('step0') });
+  let num = 1;
+  for (const qid of ALL_QUESTIONS) {
+    const el = document.getElementById('stepQ_' + qid);
+    if (el) {
+      const badge = document.getElementById('badgeQ_' + qid);
+      if (badge) badge.textContent = num;
+      stepQueue.push({ type: 'question', qid, el });
+      num++;
+    }
+  }
+}
+
+function uiSync() {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  stepQueue[curIdx].el.classList.add('active');
+
+  const isWelcome = stepQueue[curIdx].type === 'welcome';
+  const totalQ = stepQueue.length - 1; // excluding welcome
+  const currentQ = curIdx; // 0 = welcome, 1..n = questions
+
+  const progressWrap = document.getElementById('progressWrap');
+  if (isWelcome) {
+    progressWrap.style.display = 'none';
+  } else {
+    progressWrap.style.display = 'block';
+    const pct = Math.round(((currentQ - 1) / totalQ) * 100);
+    document.getElementById('pFill').style.width = pct + '%';
+    document.getElementById('pLabel').textContent = 'Крок ' + currentQ + ' з ' + totalQ;
+    document.getElementById('pPct').textContent = pct + '%';
+  }
+
+  document.getElementById('btnBack').style.visibility = curIdx > 0 ? 'visible' : 'hidden';
+
+  const nb = document.getElementById('btnNext');
+  if (isWelcome) {
+    nb.innerHTML = 'Почати <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
+  } else if (curIdx === stepQueue.length - 1) {
+    nb.innerHTML = 'Надіслати <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+  } else {
+    nb.innerHTML = 'Далі <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
+  }
+}
+
+function next() {
+  const step = stepQueue[curIdx];
+  if (!validateStep(step)) return;
+  if (curIdx === stepQueue.length - 1) { submit(); return; }
+  curIdx++;
+  saveDraft();
+  uiSync();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function prev() {
+  if (curIdx > 0) { curIdx--; saveDraft(); uiSync(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault(); next();
+  }
+});
+
+// ── Validation helpers ──
+function err(id, show) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('on', show);
+}
+function mark(id, bad) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('err', bad);
+}
+
+function validateStep(step) {
+  if (step.type === 'welcome') return true;
+  const qid = step.qid;
+
+  if (qid === 'name') {
+    const v = document.getElementById('q_name').value.trim();
+    mark('q_name', v.length < 3); err('e_name', v.length < 3);
+    return v.length >= 3;
+  }
+  if (qid === 'country') {
+    const v = document.getElementById('q_country').value.trim();
+    mark('q_country', v.length < 2); err('e_country', v.length < 2);
+    return v.length >= 2;
+  }
+  if (qid === 'recruiter_eval') {
+    const v = document.getElementById('q_recruiter_eval').value.trim();
+    mark('q_recruiter_eval', v.length < 1); err('e_recruiter_eval', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'training_impression') {
+    const v = document.getElementById('q_training_impression').value.trim();
+    mark('q_training_impression', v.length < 1); err('e_training_impression', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'adaptation') {
+    if (document.getElementById('q_no_adaptation').checked) { err('e_adaptation', false); return true; }
+    const exp = document.getElementById('q_adaptation_experience').value.trim();
+    mark('q_adaptation_experience', exp.length < 1);
+    err('e_adaptation', exp.length < 1);
+    return exp.length >= 1;
+  }
+  if (qid === 'cv_experience') {
+    const v = document.getElementById('q_cv_experience').value.trim();
+    mark('q_cv_experience', v.length < 1); err('e_cv_experience', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'team_communication') {
+    const v = document.getElementById('q_team_communication').value.trim();
+    mark('q_team_communication', v.length < 1); err('e_team_communication', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'remarks') {
+    const v = document.getElementById('q_remarks').value.trim();
+    mark('q_remarks', v.length < 1); err('e_remarks', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'suggestions') {
+    const v = document.getElementById('q_suggestions').value.trim();
+    mark('q_suggestions', v.length < 1); err('e_suggestions', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'expectations') {
+    const v = document.getElementById('q_expectations').value.trim();
+    mark('q_expectations', v.length < 1); err('e_expectations', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'quit_stage') {
+    const v = document.getElementById('q_quit_stage').value.trim();
+    mark('q_quit_stage', v.length < 1); err('e_quit_stage', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'quit_reason') {
+    const v = document.getElementById('q_quit_reason').value.trim();
+    mark('q_quit_reason', v.length < 1); err('e_quit_reason', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'return') {
+    const v = document.querySelector('input[name="ret"]:checked');
+    err('e_ret', !v);
+    if (!v) return false;
+    if (v.value === 'Можливо, за певних умов') {
+      const cond = document.getElementById('q_ret_conditions').value.trim();
+      mark('q_ret_conditions', cond.length < 1);
+      err('e_ret_conditions', cond.length < 1);
+      return cond.length >= 1;
+    }
+    err('e_ret_conditions', false);
+    return true;
+  }
+  if (qid === 'new_job') {
+    const v = document.getElementById('q_new_job').value.trim();
+    mark('q_new_job', v.length < 1); err('e_new_job', v.length < 1);
+    return v.length >= 1;
+  }
+  if (qid === 'use_monobank') {
+    const v = document.querySelector('input[name="um"]:checked');
+    err('e_um', !v); return !!v;
+  }
+  if (qid === 'recommend_score') {
+    const v = document.getElementById('q_recommend_score').value;
+    mark('q_recommend_score', !v); err('e_recommend_score', !v);
+    return !!v;
+  }
+  return true;
+}
+
+// ── Radio helper ──
+function pickRadio(lbl, name) {
+  document.querySelectorAll('input[name="' + name + '"]').forEach(r => {
+    r.closest('.opt-item').classList.remove('sel');
+  });
+  lbl.classList.add('sel');
+  lbl.querySelector('input').checked = true;
+  if (name === 'ret') syncReturnConditions();
+  saveDraft();
+}
+
+// ── Показ поля «За яких умов» при виборі «Можливо, за певних умов» ──
+function syncReturnConditions() {
+  const sel = document.querySelector('input[name="ret"]:checked');
+  const show = sel && sel.value === 'Можливо, за певних умов';
+  const wrap = document.getElementById('ret_conditions_wrap');
+  if (wrap) wrap.style.display = show ? '' : 'none';
+  if (!show) err('e_ret_conditions', false);
+}
+
+// ── «Адаптації не було» toggle ──
+function toggleNoAdaptation(cb) {
+  const wrap = document.getElementById('adaptationFields');
+  wrap.classList.toggle('fields-disabled', cb.checked);
+  if (cb.checked) {
+    mark('q_adaptation_experience', false);
+    err('e_adaptation', false);
+  }
+  saveDraft();
+}
+
+// ── Char counters ──
+const COUNTED_FIELDS = [
+  'recruiter_eval','training_impression','adaptation_experience','cv_experience',
+  'team_communication','remarks','suggestions','expectations',
+  'quit_stage','quit_reason','ret_conditions','new_job'
+];
+COUNTED_FIELDS.forEach(id => {
+  const el = document.getElementById('q_' + id);
+  const cc = document.getElementById('cc_' + id);
+  if (!el || !cc) return;
+  const max = parseInt(el.getAttribute('maxlength')) || 1000;
+  el.addEventListener('input', function () {
+    const l = this.value.length;
+    cc.textContent = l + ' / ' + max;
+    cc.className = 'cc' + (l >= max ? ' over' : l > max * .88 ? ' warn' : '');
+    if (l > 0) { mark('q_' + id, false); err('e_' + id, false); }
+  });
+});
+
+// ── Clear err on type ──
+['q_name','q_country','q_recommend_score'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => el.classList.remove('err'));
+});
+document.getElementById('q_recommend_score').addEventListener('change', function() {
+  mark('q_recommend_score', false); err('e_recommend_score', false);
+});
+
+// ── LocalStorage draft ──
+const LS_KEY = 'mono_exit_survey_v2_draft';
+
+function saveDraft() {
+  const draft = {};
+  ['q_name','q_country','q_recruiter_eval','q_training_impression',
+   'q_adaptation_experience','q_cv_experience','q_team_communication',
+   'q_remarks','q_suggestions','q_expectations','q_quit_stage','q_quit_reason',
+   'q_ret_conditions','q_new_job','q_recommend_score'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) draft[id] = el.value;
+  });
+  [['ret','ret'],['um','um']].forEach(([name, key]) => {
+    const ch = document.querySelector('input[name="' + name + '"]:checked');
+    if (ch) draft['radio_' + key] = ch.value;
+  });
+  draft['no_adaptation'] = document.getElementById('q_no_adaptation').checked;
+  draft['curIdx'] = curIdx;
+
+  try { localStorage.setItem(LS_KEY, JSON.stringify(draft)); } catch (_) {}
+}
+
+function restoreDraft() {
+  let draft;
+  try { draft = JSON.parse(localStorage.getItem(LS_KEY)); } catch (_) {}
+  if (!draft) return;
+
+  ['q_name','q_country','q_recruiter_eval','q_training_impression',
+   'q_adaptation_experience','q_cv_experience','q_team_communication',
+   'q_remarks','q_suggestions','q_expectations','q_quit_stage','q_quit_reason',
+   'q_ret_conditions','q_new_job','q_recommend_score'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && draft[id] != null) el.value = draft[id];
+  });
+
+  COUNTED_FIELDS.forEach(id => {
+    const el = document.getElementById('q_' + id);
+    const cc = document.getElementById('cc_' + id);
+    if (el && cc) {
+      const max = parseInt(el.getAttribute('maxlength')) || 1000;
+      cc.textContent = el.value.length + ' / ' + max;
+    }
+  });
+
+  [['ret','ret'],['um','um']].forEach(([name, key]) => {
+    const val = draft['radio_' + key];
+    if (!val) return;
+    const inp = document.querySelector('input[name="' + name + '"][value="' + CSS.escape(val) + '"]');
+    if (inp) {
+      inp.checked = true;
+      inp.closest('.opt-item') && inp.closest('.opt-item').classList.add('sel');
+    }
+  });
+  syncReturnConditions();
+
+  if (draft['no_adaptation']) {
+    const cb = document.getElementById('q_no_adaptation');
+    if (cb) { cb.checked = true; toggleNoAdaptation(cb); }
+  }
+
+  if (draft['curIdx'] > 0 && draft['curIdx'] < stepQueue.length) {
+    curIdx = draft['curIdx'];
+  }
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(LS_KEY); } catch (_) {}
+}
+
+// ── Collect ──
+function collect() {
+  const retV = document.querySelector('input[name="ret"]:checked');
+  const umV  = document.querySelector('input[name="um"]:checked');
+  const noAdaptation = document.getElementById('q_no_adaptation').checked;
+
+  return {
+    name: document.getElementById('q_name').value.trim(),
+    country: document.getElementById('q_country').value.trim(),
+    recruiterEval: document.getElementById('q_recruiter_eval').value.trim(),
+    trainingImpression: document.getElementById('q_training_impression').value.trim(),
+    noAdaptation: noAdaptation,
+    adaptationExperience: noAdaptation ? '' : document.getElementById('q_adaptation_experience').value.trim(),
+    cvExperience: document.getElementById('q_cv_experience').value.trim(),
+    teamCommunication: document.getElementById('q_team_communication').value.trim(),
+    remarks: document.getElementById('q_remarks').value.trim(),
+    suggestions: document.getElementById('q_suggestions').value.trim(),
+    expectations: document.getElementById('q_expectations').value.trim(),
+    quitStage: document.getElementById('q_quit_stage').value.trim(),
+    quitReason: document.getElementById('q_quit_reason').value.trim(),
+    return: retV ? retV.value : '—',
+    returnConditions: (retV && retV.value === 'Можливо, за певних умов') ? document.getElementById('q_ret_conditions').value.trim() : '',
+    newJob: document.getElementById('q_new_job').value.trim(),
+    useMonobank: umV ? umV.value : '—',
+    recommendScore: document.getElementById('q_recommend_score').value,
+  };
+}
+
+// ── Submit ──
+async function submit() {
+  const data = collect();
+  const btn = document.getElementById('btnNext');
+  btn.disabled = true;
+  const msg = document.getElementById('sendMsg');
+  if (msg) msg.textContent = 'Надсилаємо…';
+
+  if (!APPS_SCRIPT_URL) {
+    clearDraft();
+    showThankYou();
+    return;
+  }
+
+  // fetch з urlencoded-тілом: Apps Script читає це як e.parameter.payload.
+  // mode:'no-cors' — відповідь нам не потрібна, а Apps Script не віддає CORS-заголовки.
+  // Без iframe, бо CSP хостингу може блокувати вбудовування script.google.com.
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: new URLSearchParams({ payload: JSON.stringify(data) }).toString(),
+    });
+    clearDraft();
+    showThankYou();
+  } catch (err) {
+    console.error('Не вдалося надіслати відповіді:', err);
+    btn.disabled = false;
+    if (msg) msg.textContent = 'Не вдалося надіслати. Перевірте з\'єднання та натисніть «Надіслати» ще раз.';
+  }
+}
+
+function showThankYou() {
+  document.getElementById('formCard').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'none';
+  document.querySelector('.header').style.display = 'none';
+  document.getElementById('thankyou').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ──
+(function init() {
+  buildStepQueue();
+  restoreDraft();
+  uiSync();
+
+  document.querySelectorAll('input[type="text"], textarea, select').forEach(el => {
+    el.addEventListener('input', saveDraft);
+    el.addEventListener('change', saveDraft);
+  });
+  document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(el => {
+    el.addEventListener('change', saveDraft);
+  });
+})();
+</script>
+</body>
+</html>
