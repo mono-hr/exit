@@ -194,11 +194,6 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 .field-block { margin-bottom: 16px; }
 .field-block:last-child { margin-bottom: 0; }
 
-.aux-field {
-  position: absolute; left: -9999px; top: auto;
-  width: 1px; height: 1px; overflow: hidden;
-}
-
 /* ── Char counter ── */
 .cc { text-align: right; font-size: 11px; color: var(--muted); margin-top: 5px; }
 .cc.warn { color: #f59e0b; }
@@ -334,11 +329,6 @@ input.err, textarea.err, select.err { border-color: #ef4444; box-shadow: 0 0 0 3
 
 <!-- Card -->
 <div class="card" id="formCard">
-
-  <div class="aux-field" aria-hidden="true">
-    <label for="q_referral">Referral</label>
-    <input type="text" id="q_referral" name="referral" tabindex="-1" autocomplete="off">
-  </div>
 
   <!-- 0. Привітальний екран -->
   <div class="step active" id="step0">
@@ -593,7 +583,6 @@ const ALL_QUESTIONS = [
 
 // ── Конфігурація відправки ──
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzb2YBug_z5PGl4nDMw9RPDESM7rUfbziVK5BYRkjBm6EsZVZzyJ42F4-lsjZnpqG6C/exec';
-const FORM_TOKEN = 'mn_9Kq4Vb7Rt2Ls8Pw3Zc6Xj';
 
 // Чернетка старша за цей строк вважається покинутою і затирається,
 // щоб ПІБ і тексти не лежали в чужому браузері тижнями.
@@ -601,22 +590,7 @@ const DRAFT_TTL_MS = 24 * 60 * 60 * 1000; // 24 години
 
 let stepQueue = [];
 let curIdx = 0;
-let startedAt = 0;
-let submissionId = '';
 let isSending = false;
-
-// ── Унікальний id відправки ──
-function makeId() {
-  try {
-    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-    if (window.crypto && crypto.getRandomValues) {
-      const a = new Uint8Array(16);
-      crypto.getRandomValues(a);
-      return Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
-    }
-  } catch (_) {}
-  return 's' + Date.now() + '_' + String(performance.now()).replace('.', '');
-}
 
 function buildStepQueue() {
   stepQueue = [];
@@ -871,8 +845,6 @@ function saveDraft() {
   });
   draft['no_adaptation'] = document.getElementById('q_no_adaptation').checked;
   draft['curIdx'] = curIdx;
-  draft['startedAt'] = startedAt;
-  draft['submissionId'] = submissionId;
   draft['savedAt'] = Date.now();
 
   try { localStorage.setItem(LS_KEY, JSON.stringify(draft)); } catch (_) {}
@@ -922,8 +894,6 @@ function restoreDraft() {
   if (draft['curIdx'] > 0 && draft['curIdx'] < stepQueue.length) {
     curIdx = draft['curIdx'];
   }
-  if (draft['startedAt']) startedAt = draft['startedAt'];
-  if (draft['submissionId']) submissionId = draft['submissionId'];
 }
 
 function clearDraft() {
@@ -979,16 +949,6 @@ async function submit() {
     return;
   }
 
-  if (!submissionId) { submissionId = makeId(); saveDraft(); }
-
-  const envelope = {
-    token: FORM_TOKEN,
-    submissionId: submissionId,
-    elapsedMs: Date.now() - startedAt,
-    ref: document.getElementById('q_referral').value,
-    data: collect(),
-  };
-
   isSending = true;
   btn.disabled = true;
   if (msg) msg.textContent = 'Надсилаємо…';
@@ -997,7 +957,7 @@ async function submit() {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(envelope),
+      body: JSON.stringify(collect()),
       redirect: 'follow',
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -1026,7 +986,6 @@ function showThankYou() {
 
 // ── Init ──
 (function init() {
-  startedAt = Date.now();   // перезапишеться з чернетки, якщо вона є
   buildStepQueue();
   restoreDraft();
   uiSync();
@@ -1038,9 +997,6 @@ function showThankYou() {
   document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(el => {
     el.addEventListener('change', saveDraft);
   });
-
-  const aux = document.getElementById('q_referral');
-  if (aux) aux.value = '';
 })();
 </script>
 </body>
